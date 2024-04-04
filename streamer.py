@@ -279,6 +279,42 @@ class DXLinkStreamer:
         }
         await self._websocket.send(json.dumps(message))
 
+    async def subscribe_quote(
+        self,
+        symbols: List[str],
+    ) -> None:
+        await self._channel_request(EventType.QUOTE)
+        message = {
+            "type": "FEED_SUBSCRIPTION",
+            "channel": 1,
+            "add": [
+                {
+                    "symbol": ticker,
+                    "type": "Quote",
+                }
+                for ticker in symbols
+            ],
+        }
+        await self._websocket.send(json.dumps(message))
+
+    async def unsubscribe_quote(
+        self,
+        symbols: List[str],
+    ) -> None:
+        await self._channel_request(EventType.QUOTE)
+        message = {
+            "type": "FEED_SUBSCRIPTION",
+            "channel": 1,
+            "remove": [
+                {
+                    "symbol": ticker,
+                    "type": "Quote",
+                }
+                for ticker in symbols
+            ],
+        }
+        await self._websocket.send(json.dumps(message))
+
     async def _map_message(self, message) -> None:
         for item in message:
             msg_type = item.pop("eventType")
