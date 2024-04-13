@@ -4,17 +4,17 @@ from datetime import datetime
 
 import pandas as pd
 import requests
+import ujson as json
 from dateutil import tz
 
 from dxfeed_clee.candle import candle_to_dict
 from dxfeed_clee.event import EventType
-from dxfeed_clee.futures import (
-    get_all_streamer_symbols,
-    gen_futures_streamer_symbols,
-    cme_contract_code_to_datetime,
-)
+from dxfeed_clee.futures import (cme_contract_code_to_datetime,
+                                 gen_futures_streamer_symbols,
+                                 get_all_streamer_symbols)
 from dxfeed_clee.quote import Quote
-from functions import get_futures_historical_data, get_quotes
+from functions import (get_futures_historical_data,
+                       get_historical_forward_curves, get_quotes)
 from session import ProductionSession, Session
 from streamer import DXLinkStreamer
 
@@ -66,14 +66,19 @@ if __name__ == "__main__":
     # to_zone = tz.gettz("America/Chicago")
 
     t1 = time.time()
-    # start_date = datetime(2024, 3, 1)
-    # end_date = datetime(2024, 3, 28)
+
+    # symbols = gen_futures_streamer_symbols(
+    #     session=session, contract_root="SR3", year_start=23, year_end=28, only_active=False,
+    # )
+
+    start_date = datetime(2020, 1, 1)
+    end_date = datetime(2024, 4, 6)
     # interval = "1d"
     # df = asyncio.run(
     #     get_futures_historical_data(
     #         session=session,
-    #         # symbols=["BTC/USD:CXTALP"],
     #         contract_code="CL",
+    #         # symbols=["/CLZ23:XNYM"],
     #         start_date=start_date,
     #         end_date=end_date,
     #         interval=interval,
@@ -83,16 +88,29 @@ if __name__ == "__main__":
     #     )
     # )
     # print(df)
+    
+    fwd_curves_dict = asyncio.run(
+        get_historical_forward_curves(
+            session=session,
+            contract_code="NG",
+            start_date=start_date,
+            end_date=end_date,
+            xlsx_path="historical_natgas_futures_curve.xlsx",
+            return_df=True
+        )
+    )
+    
+    print(fwd_curves_dict) 
+    print(json.dumps(fwd_curves_dict, indent=4))  
+    
 
-    # symbols = gen_futures_streamer_symbols(
-    #     session=session, contract_root="NG", year_start=25, year_end=30
-    # )
-    # # quotes = asyncio.run(get_quotes(session=session, contract_code="NG", just_ask=True))
-    # quotes = asyncio.run(get_quotes(session=session, contract_code="NG", symbols=symbols, just_ask=True))
+    # quotes = asyncio.run(get_quotes(session=session, contract_code="NG", just_ask=True))
+    # quotes = asyncio.run(get_quotes(session=session, contract_code="SR3", symbols=symbols, just_midpoint=True, return_df=True))
     # print(quotes)
+    # print(json.dumps(quotes, indent=4))
 
-    date = cme_contract_code_to_datetime("/NGH30:XNYM")
-    print(date)
+    # date = cme_contract_code_to_datetime("/NGH30:XNYM")
+    # print(date)
 
     t2 = time.time()
     print(f"{t2 - t1} seconds")

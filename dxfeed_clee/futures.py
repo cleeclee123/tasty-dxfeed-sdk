@@ -138,3 +138,57 @@ def cme_contract_code_to_datetime(contract_code: str) -> datetime:
     month_number = month_codes.index(stripped[0]) + 1
     year = 2000 + int(stripped[1:])
     return datetime(year, month_number, 1)
+
+
+def sort_cme_contracts(contract_codes):
+    month_code_to_number = {
+        "F": 1,
+        "G": 2,
+        "H": 3,
+        "J": 4,
+        "K": 5,
+        "M": 6,
+        "N": 7,
+        "Q": 8,
+        "U": 9,
+        "V": 10,
+        "X": 11,
+        "Z": 12,
+    }
+
+    def parse_contract(code):
+        month_code = code[-4:][1]
+        year_code = code[-2:]
+        month_number = month_code_to_number[month_code]
+        year = 2000 + int(year_code)
+        return year, month_number
+
+    sorted_contracts = sorted(contract_codes, key=parse_contract)
+    return sorted_contracts
+
+
+def cme_contract_code_to_datetime(contract_code):
+    month_code_to_number = {
+        "F": 1,
+        "G": 2,
+        "H": 3,
+        "J": 4,
+        "K": 5,
+        "M": 6,
+        "N": 7,
+        "Q": 8,
+        "U": 9,
+        "V": 10,
+        "X": 11,
+        "Z": 12,
+    }
+    
+    if ":" in contract_code:
+        contract_code = contract_code.split(":")[0]
+
+    month_code = contract_code[-4:][1]
+    year_code = contract_code[-2:]
+    year = 2000 + int(year_code)
+    month = month_code_to_number[month_code]
+    contract_date = datetime(year, month, 1)
+    return contract_date
